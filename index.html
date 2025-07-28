@@ -1,82 +1,309 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-  <title>Weather Prediction Application</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Dashboard</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for search icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <style>
+        /* Custom styles to supplement Tailwind */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: url('https://images.unsplash.com/photo-1534088568595-a066f410bcda?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1951&q=80') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        /* Glassmorphism effect for cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        /* Simple fade-in animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Custom scrollbar for history */
+        .history-list::-webkit-scrollbar {
+            width: 5px;
+        }
+        .history-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .history-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+        .history-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
 </head>
-<body>
-  <div class="jumbotron container-fluid mt-2 text-center p-2" style="background-color:#6aa0b6; color: white;">
-    <h1><strong>Weather Prediction Application</strong></h1>
-  </div>
-  <div class="container">
-    <div class="row">
-      <div class="col-sm-4 bg-light">
-        <h4 class="pt-1"><strong>Search for a City:</strong></h4>
-        <div class="input-group mb-3">
-          <input type="text" class="form-control" id="search-city" aria-label="City Search" aria-describedby="search-button">
-          <div class="input-group-append">
-            <button class="btn bg-primary text-light" id="search-button"><i class="fa fa-search"></i></button>
-          </div>
-        </div>
-        <button class="btn btn-primary" type="button" id="clear-history">Clear history</button>
-        <ul class="list-group">
-        </ul>
-      </div>
-      <div class="col-sm-8">
-        <div class="row ml-2 border border-dark rounded">
-          <div class="col-sm-12" id="current-weather">
-            <h3 class="city-name mb-1 mt-2 bolder" id="current-city"></h3>
-            <p>Temperature:<span class="current" id="temperature"></span></p>
-            <p>Humidity:<span class="current" id="humidity"></span></p>
-            <p>Wind Speed:<span class="current" id="wind-speed"></span></p>
-            <p>UV index:<span class="current bg-danger rounded py-2 px-2 text-white" id="uv-index"></span></p>
-          </div>
-        </div>
-        <div class="col-sm-12" id="future-weather">
-          <h3>5-Day Forecast:</h3>
-          <div class="row text-light">
-            <div class="col-sm-2 bg-primary forecast text-white ml-2 mb-3 p-2 mt-2 rounded">
-              <p id="fDate0"></p>
-              <p id="fImg0"></p>
-              <p>Temp:<span id="fTemp0"></span></p>
-              <p>Humidity:<span id="fHumidity0"></span></p>
+<body class="text-white">
+
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+        
+        <!-- Main Container -->
+        <main class="w-full max-w-6xl mx-auto">
+            
+            <!-- Header -->
+            <header class="text-center mb-6 md:mb-8">
+                <h1 class="text-3xl md:text-5xl font-bold tracking-tight text-shadow">Weather Dashboard</h1>
+            </header>
+
+            <div class="flex flex-col lg:flex-row gap-6">
+
+                <!-- Left Column: Search & History -->
+                <aside class="w-full lg:w-1/3 xl:w-1/4 flex-shrink-0">
+                    <div class="glass-card rounded-2xl p-6 h-full">
+                        <h2 class="text-xl font-bold mb-4">Search for a City</h2>
+                        <div class="relative mb-4">
+                            <input type="text" id="search-city" class="w-full bg-white/20 border-0 rounded-full py-2.5 pl-4 pr-12 text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:outline-none transition" placeholder="e.g., New York">
+                            <button id="search-button" class="absolute right-0 top-0 h-full px-4 text-white/80 hover:text-white transition">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </div>
+                        <ul id="history-list" class="history-list h-48 overflow-y-auto space-y-2 mb-4">
+                            <!-- History items will be injected here -->
+                        </ul>
+                        <button id="clear-history" class="w-full bg-red-500/70 hover:bg-red-500 rounded-full py-2.5 font-semibold transition-all duration-300">Clear History</button>
+                    </div>
+                </aside>
+
+                <!-- Right Column: Weather Details -->
+                <section class="w-full lg:w-2/3 xl:w-3/4">
+                    <!-- Current Weather -->
+                    <div id="current-weather-card" class="glass-card rounded-2xl p-6 mb-6 hidden">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 id="current-city" class="text-3xl font-bold"></h3>
+                                <p id="current-date" class="text-white/80"></p>
+                            </div>
+                            <img id="current-weather-icon" src="" alt="Weather icon" class="w-20 h-20 -mt-2 -mr-2">
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                            <div class="bg-white/10 rounded-lg p-3">
+                                <p class="text-sm text-white/80">Temperature</p>
+                                <p id="temperature" class="text-2xl font-semibold"></p>
+                            </div>
+                            <div class="bg-white/10 rounded-lg p-3">
+                                <p class="text-sm text-white/80">Humidity</p>
+                                <p id="humidity" class="text-2xl font-semibold"></p>
+                            </div>
+                            <div class="bg-white/10 rounded-lg p-3">
+                                <p class="text-sm text-white/80">Wind Speed</p>
+                                <p id="wind-speed" class="text-2xl font-semibold"></p>
+                            </div>
+                            <div class="bg-white/10 rounded-lg p-3">
+                                <p class="text-sm text-white/80">UV Index</p>
+                                <p id="uv-index" class="text-2xl font-semibold px-3 py-0.5 rounded-full inline-block"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Placeholder for when no city is selected -->
+                    <div id="placeholder-card" class="glass-card rounded-2xl p-6 flex items-center justify-center h-full min-h-[250px]">
+                        <p class="text-xl text-white/80">Search for a city to see the weather</p>
+                    </div>
+
+                    <!-- 5-Day Forecast -->
+                    <div id="forecast-container" class="hidden">
+                        <h3 class="text-2xl font-bold mb-4 mt-6">5-Day Forecast</h3>
+                        <div id="forecast-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                            <!-- Forecast cards will be populated here -->
+                        </div>
+                    </div>
+                </section>
             </div>
-            <div class="col-sm-2 bg-primary forecast text-white ml-2 mb-3 p-2 mt-2 rounded">
-              <p id="fDate1"></p>
-              <p id="fImg1"></p>
-              <p>Temp:<span id="fTemp1"></span></p>
-              <p>Humidity:<span id="fHumidity1"></span></p>
-            </div>
-            <div class="col-sm-2 bg-primary forecast text-white ml-2 mb-3 p-2 mt-2 rounded">
-              <p id="fDate2"></p>
-              <p id="fImg2"></p>
-              <p>Temp:<span id="fTemp2"></span></p>
-              <p>Humidity:<span id="fHumidity2"></span></p>
-            </div>
-            <div class="col-sm-2 bg-primary forecast text-white ml-2 mb-3 p-2 mt-2 rounded">
-              <p id="fDate3"></p>
-              <p id="fImg3"></p>
-              <p>Temp:<span id="fTemp3"></span></p>
-              <p>Humidity:<span id="fHumidity3"></span></p>
-            </div>
-            <div class="col-sm-2 bg-primary forecast text-white ml-2 mb-3 p-2 mt-2 rounded">
-              <p id="fDate4"></p>
-              <p id="fImg4"></p>
-              <p>Temp:<span id="fTemp4"></span></p>
-              <p>Humidity:<span id="fHumidity4"></span></p>
-            </div>
-          </div>
-        </div>
-      </div>
+        </main>
     </div>
-  </div>
-  <script src="https://code.jquery.com/jquery.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.bundle.min.js"></script>
-  <script src="script.js"></script>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        $(document).ready(function() {
+            // --- VARIABLES ---
+            const APIKey = "a0aca8a89948154a4182dcecc780b513"; // Your OpenWeatherMap API key
+            let searchHistory = [];
+
+            // --- CORE FUNCTIONS ---
+
+            // Function to display weather data
+            function displayWeather(city) {
+                // Hide placeholder and show weather cards
+                $('#placeholder-card').addClass('hidden');
+                $('#current-weather-card, #forecast-container').removeClass('hidden').show();
+
+
+                // Fetch current weather
+                const queryURL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${APIKey}&units=metric`;
+                $.ajax({ url: queryURL, method: "GET" }).then(function(response) {
+                    // Update current weather card
+                    $('#current-city').text(response.name);
+                    $('#current-date').text(new Date(response.dt * 1000).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
+                    $('#current-weather-icon').attr('src', `https://openweathermap.org/img/wn/${response.weather[0].icon}@2x.png`);
+                    $('#temperature').html(`${Math.round(response.main.temp)}&deg;C`);
+                    $('#humidity').text(`${response.main.humidity}%`);
+                    $('#wind-speed').text(`${(response.wind.speed * 3.6).toFixed(1)} km/h`);
+
+                    // Fetch and display UV index
+                    fetchUVIndex(response.coord.lat, response.coord.lon);
+                    
+                    // Save to history
+                    saveToHistory(city);
+                }).fail(function() {
+                     alert('City not found. Please try again.');
+                     $('#placeholder-card').removeClass('hidden');
+                     $('#current-weather-card, #forecast-container').addClass('hidden');
+                });
+
+                // Fetch 5-day forecast
+                const forecastURL = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${APIKey}&units=metric`;
+                $.ajax({ url: forecastURL, method: "GET" }).then(function(response) {
+                    const forecastGrid = $('#forecast-grid');
+                    forecastGrid.empty(); // Clear previous forecast
+
+                    // Filter for one forecast per day (around noon)
+                    const dailyForecasts = response.list.filter(item => item.dt_txt.includes("12:00:00"));
+
+                    dailyForecasts.forEach(day => {
+                        const date = new Date(day.dt * 1000);
+                        const forecastCard = `
+                            <div class="glass-card rounded-2xl p-4 text-center flex flex-col items-center justify-between hover:scale-105 transition-transform duration-300">
+                                <p class="font-bold text-lg">${date.toLocaleDateString('en-US', { weekday: 'short' })}</p>
+                                <p class="text-sm text-white/80">${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                                <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" alt="Weather icon" class="w-16 h-16">
+                                <p class="font-semibold text-xl">${Math.round(day.main.temp)}&deg;C</p>
+                            </div>
+                        `;
+                        forecastGrid.append(forecastCard);
+                    });
+                });
+            }
+
+            // Function to fetch and display UV index with color coding
+            function fetchUVIndex(lat, lon) {
+                const uvURL = `https://api.openweathermap.org/data/2.5/uvi?appid=${APIKey}&lat=${lat}&lon=${lon}`;
+                $.ajax({ url: uvURL, method: "GET" }).then(function(response) {
+                    const uvValue = response.value;
+                    const uvIndexEl = $('#uv-index');
+                    uvIndexEl.text(uvValue);
+
+                    // Remove previous color classes
+                    uvIndexEl.removeClass('bg-green-500 bg-yellow-500 bg-orange-500 bg-red-500 bg-purple-500');
+
+                    // Add color based on UV index value
+                    if (uvValue < 3) uvIndexEl.addClass('bg-green-500');
+                    else if (uvValue < 6) uvIndexEl.addClass('bg-yellow-500');
+                    else if (uvValue < 8) uvIndexEl.addClass('bg-orange-500');
+                    else if (uvValue < 11) uvIndexEl.addClass('bg-red-500');
+                    else uvIndexEl.addClass('bg-purple-500');
+                });
+            }
+
+            // --- HISTORY MANAGEMENT ---
+
+            // Function to save city to history
+            function saveToHistory(city) {
+                const normalizedCity = city.toLowerCase();
+                if (!searchHistory.includes(normalizedCity)) {
+                    searchHistory.unshift(normalizedCity); // Add to the beginning
+                    if (searchHistory.length > 8) {
+                        searchHistory.pop(); // Limit history size
+                    }
+                    localStorage.setItem('weatherSearchHistory', JSON.stringify(searchHistory));
+                    renderHistory();
+                }
+            }
+
+            // Function to render the history list
+            function renderHistory() {
+                const historyList = $('#history-list');
+                historyList.empty();
+                searchHistory.forEach(city => {
+                    const capitalizedCity = city.replace(/\b\w/g, l => l.toUpperCase());
+                    const historyItem = `
+                        <li class="history-item glass-card rounded-full px-4 py-2 text-center cursor-pointer hover:bg-white/30 transition-all duration-300" data-city="${city}">
+                            ${capitalizedCity}
+                        </li>
+                    `;
+                    historyList.append(historyItem);
+                });
+            }
+            
+            // Function to load history from localStorage
+            function loadHistory() {
+                const storedHistory = localStorage.getItem('weatherSearchHistory');
+                if (storedHistory) {
+                    searchHistory = JSON.parse(storedHistory);
+                    renderHistory();
+                    if(searchHistory.length > 0){
+                        displayWeather(searchHistory[0]); // Load the last searched city on startup
+                    }
+                }
+            }
+
+            // --- EVENT LISTENERS ---
+
+            // Search button click
+            $('#search-button').on('click', function() {
+                const city = $('#search-city').val().trim();
+                if (city) {
+                    displayWeather(city);
+                    $('#search-city').val('');
+                }
+            });
+
+            // Search input enter key
+            $('#search-city').on('keypress', function(e) {
+                if (e.which === 13) { // Enter key
+                    $('#search-button').click();
+                }
+            });
+
+            // History item click
+            $(document).on('click', '.history-item', function() {
+                const city = $(this).data('city');
+                displayWeather(city);
+            });
+
+            // Clear history button click
+            $('#clear-history').on('click', function() {
+                searchHistory = [];
+                localStorage.removeItem('weatherSearchHistory');
+                renderHistory();
+                $('#placeholder-card').removeClass('hidden');
+                $('#current-weather-card, #forecast-container').addClass('hidden');
+            });
+
+            // --- INITIALIZATION ---
+            loadHistory();
+        });
+    </script>
 </body>
 </html>
